@@ -1,0 +1,513 @@
+------------------------------------------------------------------------------------------
+COMPREHENSIVE AND EXHAUSTIVE ARCH LINUX STEP-BY-STEP SETUP GUIDE
+------------------------------------------------------------------------------------------
+	
+	Author: Brian Dmyszewicz
+	Tested and up to date on the 2021/11/01 ISO
+
+	About: (TLDR)
+	This guide is meant for all linux users willing to give arch a try but not
+	being able to grasp the multitude of options and concepts described on archwiki.
+	It aims to provide sane defaults and cover system optimization and maintenance.
+	New linux users can easily follow this guide as well, but I strongly recommend
+	getting familiar with linux directory structure and system commands first.
+	If you want to modify the guide, consider submitting a pull request,
+	so that we can improve it together. Let me know if you share or feature
+	it anywhere, I'd love to know that it helped some people out ^^
+	
+	Commands are marked with: $, comments: #, names: "...", optional: (...)
+	The configuration covered in the guide includes but is not limited to:
+	- GUID/GPT partition scheme with separate home and swap partitions
+	- ext4 file system
+	- systemd-boot bootloader
+	- mirrors refresh automation
+	- GPU drivers for all common GPU configurations
+	- Vulkan graphics
+	- hardware video acceleration
+	- an AUR helper (paru or yay)
+	- Gnome desktop configuration
+	
+	Planned additions:
+	- KDE desktop environments configurations
+	- openCL and CUDA configurations
+	- btrfs filesystem
+	- GRUB bootloader
+	- full disk encryption
+	- creating virtual partitions with lvm
+	- OPTIMUS hybrid graphics
+	- performance optimizations
+	- optimizing battery life on laptops
+	- silent and fast boot
+	- zsh customization
+	- pipewire audio
+	- drivers for old Radeon GPUs
+	- configuration of a window manager based system (when i find more time)
+	- replacing systemd with openrc/runit (maybe some day when i feel like it)
+
+------------------------------------------------------------------------------------------
+STAGE 0: CREATE A BOOTABLE USB AND CHANGE BIOS SETTINGS
+------------------------------------------------------------------------------------------
+	
+	Download the latest ISO from https://archlinux.org/download/
+	
+	Verify the image: (optional, linux-only)
+		# Download the PGP signature, place it in the ISO directory and run:
+		$ gpg --keyserver-options auto-key-retrieve 
+		--verify archlinux-"ISO version"-x86_64.iso.sig
+	
+	- Windows: 
+		# use Rufus, format to FAT32, burn the ISO (www.rufus.ie)
+		
+	- Linux: 
+		$ lsblk	
+		# determine the usb drive directory (eg. sdb), easiest by looking at size
+		# format the usb drive to FAT32 using any graphical utility or: 
+			$ sudo umount /dev/sdb1
+			$ sudo mkfs.vfat -F 32 /dev/sdb1
+			$ sudo mount 
+		$ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdb
+			# eg. cp ~/Downloads/archlinux-2021.11.01-x86_64.iso /dev/sdb
+			# assuming usb is /dev/sdb
+		
+	Insert the USB, 
+	Enter BIOS on startup (by mashing F2, F7, F11 etc. depending on the motherboard)
+	Disable secure boot (clear/delete secure boot keys if necessary, it's reversible)
+	Disable fast boot (might not be required, remember to reenable it after install)
+	Change the boot priority of the USB drive to be the highest
+	Save changes and exit (should reboot into arch)
+		
+------------------------------------------------------------------------------------------
+STAGE 1: INITIAL ISO SETUP
+------------------------------------------------------------------------------------------
+	
+	Verify (uefi) boot mode:
+		$ ls /sys/firmware/efi/efivars
+
+	Check network interface:
+		$ ip link
+	
+	Connect to wifi: (optional) 
+		$ iwctl
+		$ device list				# find wireless interface/device
+		$ station "Device" scan;		# eg. station wlan0 scan
+		$ station "Device" get-networks; 
+		$ station "Device" connect "Network"
+		$ "network's wifi password"		
+		# wait a couple seconds and quit iwctl using ctrl+d
+	
+	Verify connection:
+		$ ping -c 5 archlinux.org
+	
+	In case of wifi connection issues: (optional)
+		$ rfkill unblock all
+	
+	Update system clock:
+		$ timedatectl set-ntp true
+		$ timedatectl status
+
+------------------------------------------------------------------------------------------
+STAGE 2: PARTITION, FORMAT, MOUNT, INSTALL
+------------------------------------------------------------------------------------------
+	
+	(assuming hard drive is /dev/sda)
+		
+	Partition disks: (only boot and root are required)
+		$ lsblk					# or fdisk -l for more info
+		$ hdparm -i /dev/sda 			# helps identify the drive
+		$ gdisk /dev/sda; x; z 			# wipes the drive
+		$ cgdisk /dev/sda
+			New; default; "..."MiB; ef00; boot	# 1024MiB is recommended
+			New; default; "..."GiB; 8200; swap	# for hibernation 2xRam
+			New; default; "..."GiB; default, root	# at least 20, safest 40
+			New; default; default; default; home
+			Write; Quit; 
+
+	Format partitions and setup Swap:
+		$ mkfs.fat -F32 /dev/sda1		# formats boot as fat32
+		$ mkswap /dev/sda2			# makes swap on swap partition
+		$ swapon /dev/sda2			# enables swap
+		$ mkfs.ext4 /dev/sda3			# formats root to ext4
+		$ mkfs.ext4 /dev/sda4			# formats home to ext4
+		
+	Mounting folders for installation:
+		$ mount /dev/sda3 /mnt			# mount root
+		$ mkdir /mnt/boot
+		$ mkdir /mnt/home
+		$ mount /dev/sda1 /mnt/boot		# mount boot
+		$ mount /dev/sda4 /mnt/home		# mount home
+		
+	Configuring mirrors on the installation device: (optional but recommended)
+		$ nano /etc/xdg/reflector/reflector.conf
+			--save /etc/pacman.d/mirrorlist
+			--country "Country1","Country2..."
+			--protocol https
+			--sort rate
+			--latest 5
+		$ systemctl start reflector.service	# refresh mirrors
+						  
+	Installation of system and base utilities: 
+		$ pacstrap -i /mnt base base-devel
+				   linux linux-headers
+		  		   linux-firmware nano git
+		# optionally you can instead install lts or custom kernel and headers
+		
+	Making fstab file to mount partitions into filesystem:
+		$ genfstab -U /mnt >> /mnt/etc/fstab
+		$ cat /mnt/etc/fstab
+		
+		
+------------------------------------------------------------------------------------------
+STAGE 3: ESSENTIAL SYSTEM CONFIGURATION
+------------------------------------------------------------------------------------------
+
+	Change root to load into the new system:
+		$ arch-chroot /mnt	
+		
+	Set time zone:
+		$ hwclock --systohc (--utc)		# use hardware clock
+		$ timedatectl list-timezones
+		$ timedatectl set-timezone "Region"/"City"
+		# or this? $ ln -sf /usr/share/zoneinfo/"Region"/"City" /etc/localtime
+		$ timedatectl set-ntp true
+		$ timedatectl status
+		# systemctl enable systemd-timesyncd		
+			# synchs clock on boot, should be enabled by set-ntp true
+		
+	Mirror refresh automation:
+		$ pacman -Syu reflector
+		$ nano /etc/xdg/reflector/reflector.conf
+			--save /etc/pacman.d/mirrorlist
+			--country "Country1","Country2..."
+			--protocol https
+			--sort rate
+			--latest 5
+		$ systemctl enable reflector.timer	# refreshes once a week
+		
+	Hostname configuration:
+		$ hostnamectl set-hostname "Hostname"	# eg. ArchLinux
+		$ nano /etc/hosts
+			127.0.0.1 localhost
+			::1	  localhost
+			127.0.1.1 "Hostname"
+	
+	Set system locale: 
+		$ nano /etc/locale.gen		
+		# Uncomment selected locale
+			# eg. en_US.UTF-8 for default American English
+			# eg. en_IE.UTF-8 for English with EU formats and metric units
+		$ locale-gen
+		$ echo LANG=en_IE.UTF-8 > /etc/locale.conf	
+			# creates locale.conf and sets it to chosen locale
+		$ export LANG=en_IE.UTF-8					
+			# sets locale for all processes for current shell
+			
+	Network configuration:
+		$ pacman -S networkmanager
+		$ systemctl enable NetworkManager.service
+		# after booting into the system, use $ nmtui or $ nmcli to set up wifi
+					
+	Enable multilib (32 bit app support): (optional, recommended)
+		$ nano /etc/pacman.conf
+		# Uncomment 2 lines: [multilib] and Include =...
+		$ pacman -Syu
+	
+	For LVM, system encryption or RAID: (skip this, only here as reference)
+		$ nano /etc/mkinitspcio.conf 		# modify initramfs config
+		$ mkinitcpio -P				# recreate image using config
+		$ mkinitcpio -p linux			# regenerate using linux defaults
+		# image must be specified in boot loader config file
+	
+	Set root password:
+		$ passwd
+		
+	Create a user with administrative privileges, create user password:
+		$ useradd -m -g users -G wheel "user"
+		$ passwd "user"
+		
+	Associate wheel group with sudo:
+		$ EDITOR=nano visudo			# safely edit /etc/sudoers file
+		# Uncomment %wheel ALL=(ALL) ALL
+		# If you want to require roots instead of users password
+		  you can add this after the last line in this file: (optional)
+			Defaults rootpw			
+	
+	Install and configure boot loader: (can use grub instead)
+		$ bootctl install
+		$ pacman -S intel-ucode			# for intel CPUs
+		$ pacman -S amd-ucode			# for AMD CPUs
+		$ nano /boot/loader/entries/"Name".conf	# arch.conf used in this guide
+			title "Title"			# eg. title ArchLinux
+			linux /vmlinuz-linux
+			initrd /"cpu"-ucode.img		# intel-ucode.img / amd-ucode.img
+			initrd /initramfs-linux.img
+		$ echo "options root=PARTUUID=$(blkid -s PARTUUID -o value /dev/sda3)
+		  rw" >> /boot/loader/entries/arch.conf
+			# this ensures that only the boot partition (sda3) will be used
+			  to boot the system by using UUID to identify it
+		# In order to automatically update the bootloader, create a pacman hook:
+
+------------------------------------------------------------------------------------------
+STAGE 4: INSTALLING GPU DRIVERS
+------------------------------------------------------------------------------------------
+
+	Identify the GPU:
+		$ lspci -k | grep -A 2 -E "(VGA|3D)"
+
+	Intel integrated graphics:
+		$ pacman -S xf86-video-intel		# DDX driver and 2D acceleration
+			    mesa lib32-mesa	 	# DRI driver for 3D acc / OpenGL
+ 		 	    vulkan-icd-loader lib32-vulkan-icd-loader	# Vulkan
+			    vulkan-intel lib32-vulkan-intel 		# Vulkan drivers
+
+	AMD modern: (GCN3/Radeon Rx 300 and newer cards)
+		$ pacman -S xf86-video-amdgpu		# DDX driver and 2D acceleration
+			    mesa lib32-mesa		# DRI driver for 3D acc / OpenGL
+ 		 	    vulkan-icd-loader lib32-vulkan-icd-loader	# Vulkan
+			    vulkan-radeon lib32-vulkan-radeon 		# Vulkan drivers
+
+	AMD legacy: (GCN2/Radeon Rx 200 and older cards)
+		# optionally, for Radeon HD 7000 and RX200 generations check:
+		  https://wiki.archlinux.org/title/AMDGPU#Experimental
+		# otherwise follow the steps described on:
+		  https://wiki.archlinux.org/title/ATI
+		  
+	AMD legacy: (GCN3/Radeon Rx 300 and newer cards)
+		$ pacman -S xf86-video-ati		# DDX driver and 2D acceleration
+			    mesa lib32-mesa		# DRI driver for 3D acc / OpenGL
+ 		 	   
+	Nvidia:
+		# Install only ONE of the following 3 packages, depending on your kernel
+			$ pacman -S nvidia		# for standard linux kernel
+			$ pacman -S nvidia-lts 		# for the linux-lts kernel
+			$ pacman -S nvidia-dkms		# other kernels eg. linux-zen
+			
+		$ pacman -S vulkan-icd-loader lib32-vulkan-icd-loader	# Vulkan
+			    nvidia-utils lib32-nvidia-utils		# OpenGL, Vulkan
+			    nvidia-settings 		# Nvidia settings menu
+			    xorg-server-devel 		# necessary for nvidia-xconfig
+			    opencl-nvidia		# openCL support
+		$ nvidia-xconfig		# optional auto-configuration for xorg
+		$ nvidia-settings		# settings GUI, use after installation
+		
+		# Enable DRM (direct rendering manager) kernel mode setting
+		  Required for Nvidia with Wayland, always recommended:
+			$ nano /boot/loader/entries/arch.conf
+				# set kernel parameter: nvidia-drm.modeset=1
+				  after current options root=(...) rw
+				  eg. (...) rw nvidia-drm.modeset=1
+				  
+		# Ensure early loading of the drivers: (optional, recommended?)
+			$ nano /etc/mkinitcpio.conf
+				# MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
+				
+		# Required for custom kernels (and when using early loading?)
+		  Auto-update initramfs after a driver update (required if early loading)
+			$ nano /etc/pacman.d/hooks/nvidia.hook
+				[Trigger]
+				Operation=Install
+				Operation=Upgrade
+				Operation=Remove
+				Type=Package
+				Target=nvidia		# or nvidia-lts or nvidia-dkms
+				Target=linux		# or linux-lts or other kernel
+
+				[Action]
+				Description=Update Nvidia module in initcpio
+				Depends=mkinitcpio
+				When=PostTransaction
+				NeedsTargets
+				Exec=/bin/sh -c 'while read -r trg; do case $trg in linux) 
+					       exit 0; esac; done; /usr/bin/mkinitcpio -P'
+
+	PRIME: 
+		# hybrid graphics on laptops - Intel/AMD+Nvidia/AMD
+		  check arch wiki, if you have a laptop with a modern dedicated gpu
+	  	  you can help me update this section, i cannot do it myself rn
+	  	  
+	Vulkan verification: (optional, recommended)
+		$ ls /usr/share/vulkan/icd.d/		# shows installed implementations
+		$ pacman -S vulkan-tools
+		$ vulkaninfo				# should show info about your GPU
+		
+	Hardware video acceleration: (optional, untested, ignore if not sure)
+		- Intel integrated graphics: (pick one or none depending on your CPU)
+			$ pacman -S intel-media-driver	# 5th gen and newer intel CPUs
+				    libva-intel-driver	# 3rd and 4th gen intel CPUs
+		- AMD: (install both unless running an ancient GPU)
+			$ pacman -S libva-mesa-driver	# R600 (Radeon HD 2000) and newer
+				    mesa-vdpau		# R300 (Radeon 9000) and newer
+		- Nvidia:
+			# hardware accelerated video decoding provided by nvidia-utils
+			# for encoding with NVENC, create this rule:
+			$ nano /etc/udev/rules.d/70-nvidia.rules
+				ACTION=="add", DEVPATH=="/bus/pci/drivers/nvidia", 
+				RUN+="/usr/bin/nvidia-modprobe -c0 -u"
+		
+	Verify hardware video acceleration: (optional, untested)
+		$ pacman -S libva-utils	vdpauinfo
+		$ vainfo				# verify VA-API settings
+		$ vdpauinfo				# verify VDPAU settings
+		$ pacman -S intel-gpu-tools		# for intel GPUs
+		$ intel-gpu-top				# play video and monitor gpu usage
+		$ pacman -S radeontop			# for AMD GPUs
+		$ radeontop 				# play video and monitor gpu usage
+		
+------------------------------------------------------------------------------------------
+STAGE 5: BOOTING INTO THE SYSTEM, ADDITIONAL CONFIGURATION
+------------------------------------------------------------------------------------------
+
+	Boot into the system: (remove usb/change boot priority)
+		$ exit
+		$ umount -a
+		$ reboot
+
+	Setup wifi: (optional)
+		$ nmtui					# network manager text based UI
+		$ ping -c 5 archlinux.org		# verify connection
+
+	Install an AUR (Arch User Repository) helper:	# paru or yay are recommended
+		$ cd /tmp
+		$ git clone https://aur.archlinux.org/paru.git
+		$ cd paru
+		$ makepkg -si
+		$ paru "Package" 			# searches for a package
+		$ paru (-Syu)				# upgrade system including AUR
+	
+	Install Display Server:
+		$ sudo pacman -S xorg
+		# if you don't want to use a display manager: (optional, unrecommended)
+			$ sudo pacman -S xorg-xinit
+			$ cp /etc/X11/xinit/xinitrc ~/.xinitrc	# user config file
+			$ startx				# run it on startup 
+			
+------------------------------------------------------------------------------------------
+STAGE 6: INSTALLING A DESKTOP ENVIRONMENT, DISPLAY MANAGER AND ENABLING SERVICES
+------------------------------------------------------------------------------------------
+	
+	Installing Gnome:
+		$ sudo pacman -S gdm gnome gnome-tweaks
+		$ sudo systemctl enable --now gdm.service
+		
+		# when using Nvidia and Xwayland, enable kms-modifiers through gsettings:
+			$ gsettings set org.gnome.mutter 
+					experimental-features [\"kms-modifiers\"]
+		# for some Nvidia configurations, GDM disables Wayland using an udev rule
+		  if you encounter issues and want to use Wayland, disale the rule using:
+		  	$ sudo ln -s /dev/null /etc/udev/rules.d/61-gdm.rules		
+	
+	Installing useful packages:
+		$ sudo pacman -S openssh bluez bluez-utils
+	
+	Enable services on startup: (if installed)
+		$ systemctl enable 
+			sshd				# for ssh 
+			fstrim.timer 			# crucial for SSD drives!
+			bluetooth	
+
+------------------------------------------------------------------------------------------
+STAGE 7: PERFORMANCE OPTIMIZATIONS
+------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------
+STAGE 8: POWER OPTIMIZATIONS
+------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------
+ESSENTIALS OF SYSTEM MANAGEMENT AND TROUBLESHOOTING
+------------------------------------------------------------------------------------------
+
+	Using pacman to update, install and remove packages:
+		$ sudo pacman -Syu		
+			# synchs packages and upgrade system
+		$ sudo pacman -S "Package1" "Package2"	
+			# install Package1 and Package2
+		$ sudo pacman -Rsc "Package"
+			# remove Package, its unneeded dependencies and its config files
+	
+	Using an AUR helper to install and update packages: (paru or yay)
+		$ paru -Syu				# upgrades/rebuilds AUR packages
+		$ paru "Package"			# looks for a package to install
+			
+	Installing packages from github or AUR without a helper:
+		$ cd /tmp				# or elsewhere, to keep the files
+		$ git clone "URL to AUR or github"
+		$ cd "Package"
+		$ less PKGBUILD				# inspect package before building
+		$ makepkg -si
+			
+	System troubleshooting:
+		# if arch can't verify gpg keys when trying to update/install, run:
+			$ sudo pacman -S archlinux-keyring
+		# in case of issues with the mirrors, refresh them using reflector:
+			$ sudo systemctl start reflector.service
+		# in case of DE or DM issues, ctrl+alt+F1-F6 can be used to switch to TTY
+		# to try and fix a system that doesn't boot, boot into USB Arch ISO and: 
+			$ mount /dev/sda3 /mnt
+			$ mount /dev/sda1 /mnt/boot
+			$ mount /dev/sda4 /mnt/home
+			$ arch-chroot /mnt /bin/bash
+		# in case of a package breaking, you can downgrade to a previous version:
+			$ pacman -U /var/cache/pacman/pkg/"Old Package Version"
+		# a downgraded package can be blacklisted to avoid pacman upgrading it,
+		  make sure to remove it later since partial upgrades are not supported
+			$ sudo nano /etc/pacman.conf
+				[options]
+				(...)
+				IgnorePkg="Package"
+			
+	Network troubleshooting tools:
+		$ rfkill unblock all			# unblocks all connections
+		$ ip link				# lists interfaces
+		$ ip link show dev "Interface"		# status of Interface
+		$ ip link set "Interface" up/down	# enable/disable Interface
+		$ systemctl --type=service		# look for conflicting services
+
+	AVOID those FORBIDDEN pacman commands:
+		$ sudo pacman -Sy
+			# downloads latest package database without upgrading
+			  this can lead to dependency issues
+		$ sudo pacman -Syy
+			# force refreshes package database and does the same thing
+			  can cause dependency issues and partial upgrades
+		$ sudo pacman -Syyu
+			# forces refresh of database and updates without downgrading
+			  can also lead to a partial upgrade
+		$ sudo pacman -Syyy	
+			# this one isn't even correct, it will just execute -Syy
+			  I have no idea why some people (youtubers xd) do this
+		# Conclusion: to avoid breakage, whenever using -y, use -u
+
+	More useful pacman commands for system management:	
+		$ sudo pacman -Syyuu	
+			# force refresh of database and upgrade system, allow downgrades
+		$ sudo pacman -Sg "Group"
+			# list all packages in the package group named group
+		$ sudo pacman -R "Package"
+			# remove Package
+		$ sudo pacman -Rs "Package"			
+			# remove Package and its dependencies not used by other packages
+		$ sudo pacman -Rdd "Package"
+			# remove Package even if it's a dependency, careful!
+		$ sudo pacman -Qdt
+			# list all orphans - dependencies unneeded by other packages
+		$ sudo pacman -Qtdq | pacman -Rns -
+			# recursively removes true orphans and their configs
+		$ sudo pacman -Qttdq | pacman -Rns -
+			# recursively removes orphans, even if they're optional deps
+		$ sudo pacman -Qe
+			# list all explicitly installed packages
+		$ sudo pacman -Qet
+			# list all explicitly installed packages that aren't deps
+		$ sudo pacman -Qm
+			# list all foreign packages (eg. manually downloaded)
+		$ sudo pacman -D --asexplicit (--asdeps) "Package"
+			# change installation reason to explicit (or to dependency)
+		$ sudo pacman -S --asdeps "Package"
+			# installs Package (eg. an optional dependency) as a dependency
+		$ sudo pacman -S --asdeps --needed $(pacman -Si "Package" | 
+		  sed -n '/^Opt/,/^Conf/p' | sed '$d' | sed 's/^Opt.*://g' | 
+		  sed 's/^\s*//g' | tr '\n' ' ')
+		  	# install Package's optional dependencies as dependencies
+
+
+	
