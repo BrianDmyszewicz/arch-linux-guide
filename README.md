@@ -9,6 +9,7 @@ Conventions used in this guide are as follows:
 - Comments marked with: #
 - Names or values to input: "..." 
 - Optional names/values: (...)
+- Optional steps marked with cursive
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda)
 
@@ -16,22 +17,21 @@ Conventions used in this guide are as follows:
 
 ### Create a bootable USB 
 
-#### On Linux or Mac:
+#### - On Linux or Mac:
 
-##### Download the latest ISO from https://archlinux.org/download/
+Download the latest ISO from https://archlinux.org/download/
 
-##### Verify the image: _(optional)_
-
+_Verify the image:_ \
 Download the PGP signature, place it in the ISO directory and run: \
 `$ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig`
 
-##### List all devices to determine the usb drive directory (eg. sdb, sdc) by looking at size: \
+List all devices to determine the usb drive directory (eg. sdb, sdc) by looking at size: \
 `$ lsblk`
 
-##### Copy the ISO to the USB drive directory sdY (NOT to a specific partition eg. sdY1) \
+Copy the ISO to the USB drive directory sdY (NOT to a specific partition eg. sdY1) \
 `$ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY`
       
-#### On Windows: 
+#### - On Windows: 
 
 Download the latest ISO from https://archlinux.org/download/
 
@@ -39,12 +39,12 @@ Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
 
 ### Change BIOS settings and boot into Arch live environment
 
-##### Insert the USB \
-##### Enter BIOS on startup (by mashing F2, F7, F11 etc. depending on the motherboard) \
-##### Disable secure boot (clear/delete secure boot keys if necessary, it's reversible) \
-##### Disable fast boot (might not be required, remember to reenable it after install) \
-##### Change the boot priority of the USB drive to be the highest \
-##### Save changes and exit (should reboot into arch)
+Insert the USB \
+Enter BIOS on startup (by mashing F2, F7, F11 etc. depending on the motherboard) \
+Disable secure boot (clear/delete secure boot keys if necessary, it's reversible) \
+Disable fast boot (might not be required, remember to reenable it after install) \
+Change the boot priority of the USB drive to be the highest \
+Save changes and exit (should reboot into arch)
 
 ## Stage 1: Initial ISO setup
 
