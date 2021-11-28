@@ -14,11 +14,9 @@ Conventions used in this guide are as follows:
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda, nvme0)
 
-# Step 0: Create a bootable USB and change BIOS settings
+## Step 0: Create a bootable USB 
 
-## Create a bootable USB 
-
-### On Linux or Mac:
+#### On Linux or Mac:
 
 Download the latest ISO from https://archlinux.org/download/
 
@@ -37,13 +35,13 @@ Copy the ISO to the USB drive directory sdY (replace sdY by whatever your drive 
 $ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
 ```
       
-### On Windows: 
+#### On Windows: 
 
 Download the latest ISO from https://archlinux.org/download/
 
 Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
 
-## Change BIOS settings and boot into Arch live environment
+#### Change BIOS settings and boot into Arch live environment:
 
 Insert the USB \
 Enter BIOS on startup (by mashing F2, F7, F11 etc. depending on the motherboard) \
@@ -52,7 +50,7 @@ Disable fast boot (might not be required, remember to reenable it after install)
 Change the boot priority of the USB drive to be the highest \
 Save changes and exit (should reboot into arch)
 
-# Step 1: Initial ISO setup
+## Step 1: Initial ISO setup
 
 Verify (uefi) boot mode:
 ```
@@ -91,7 +89,7 @@ $ timedatectl set-ntp true
 $ timedatectl status
 ```
 
-# Step 2: Partition, format, mount, install
+## Step 2: Partition, format, mount, install
 
 Partition disks: \
 _(separate home and swap partitions are optional, replace sdX with your drive name eg. sda or nvme0)_
@@ -152,16 +150,16 @@ $ genfstab -U /mnt >> /mnt/etc/fstab
 $ cat /mnt/etc/fstab
 ```
 
-# Step 3: Essential system configuration
+## Step 3: Essential system configuration
 
-# Step 4: Installing GPU drivers
+## Step 4: Installing GPU drivers
 
-# Step 5: Booting into the system, additional configuration
+## Step 5: Booting into the system, additional configuration
 
-# Step 6: Installing a Desktop Environment, Display Manager, enabling services
+## Step 6: Installing a Desktop Environment, Display Manager, enabling services
 
-# Step 7: Performance optimizations
+## Step 7: Performance optimizations
 
-# Step 8: Power optimizations (for laptops)
+## Step 8: Power optimizations (for laptops)
 
-# Step 9: Essentials of system management & Troubleshooting
+## Step 9: Essentials of system management & Troubleshooting
