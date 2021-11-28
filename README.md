@@ -19,6 +19,7 @@ Conventions used in this guide are as follows:
 Download the latest ISO from https://archlinux.org/download/
 
 Verify the image: (optional)
+
 Download the PGP signature, place it in the ISO directory and run:
 $ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig
 
