@@ -16,11 +16,11 @@ Conventions used in this guide are as follows:
 
 ### Create a bootable USB on Linux:
 
-Download the latest ISO from https://archlinux.org/download/
+###### Download the latest ISO from https://archlinux.org/download/
 
-Verify the image: (optional) \
-  Download the PGP signature, place it in the ISO directory and run: \
-  $ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig
+###### Verify the image: (optional) \
+- Download the PGP signature, place it in the ISO directory and run:
+`$ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig`
 
 List all devices to determine the usb drive directory (eg. sdb, sdc) by looking at size:
   $ lsblk
