@@ -13,11 +13,11 @@ Conventions used in this guide are as follows:
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda)
 
-## Stage 0: Create a bootable USB and change BIOS settings
+# Stage 0: Create a bootable USB and change BIOS settings
 
-### Create a bootable USB 
+## Create a bootable USB 
 
-#### - On Linux or Mac:
+### - On Linux or Mac:
 
 Download the latest ISO from https://archlinux.org/download/
 
@@ -31,13 +31,13 @@ List all devices to determine the usb drive directory (eg. sdb, sdc) by looking 
 Copy the ISO to the USB drive directory sdY (NOT to a specific partition eg. sdY1) \
 `$ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY`
       
-#### - On Windows: 
+### - On Windows: 
 
 Download the latest ISO from https://archlinux.org/download/
 
 Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
 
-### Change BIOS settings and boot into Arch live environment
+## Change BIOS settings and boot into Arch live environment
 
 Insert the USB \
 Enter BIOS on startup (by mashing F2, F7, F11 etc. depending on the motherboard) \
