@@ -13,7 +13,7 @@ Conventions used in this guide are as follows:
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda)
 
-# Stage 0: Create a bootable USB and change BIOS settings
+# Step 0: Create a bootable USB and change BIOS settings
 
 ## Create a bootable USB 
 
@@ -46,20 +46,20 @@ Disable fast boot (might not be required, remember to reenable it after install)
 Change the boot priority of the USB drive to be the highest \
 Save changes and exit (should reboot into arch)
 
-## Stage 1: Initial ISO setup
+# Step 1: Initial ISO setup
 
-## Stage 2: Partition, format, mount, install
+# Step 2: Partition, format, mount, install
 
-## Stage 3: Essential system configuration
+# Step 3: Essential system configuration
 
-## Stage 4: Installing GPU drivers
+# Step 4: Installing GPU drivers
 
-## Stage 5: Booting into the system, additional configuration
+# Step 5: Booting into the system, additional configuration
 
-## Stage 6: Installing a Desktop Environment, Display Manager, enabling services
+# Step 6: Installing a Desktop Environment, Display Manager, enabling services
 
-## Stage 7: Performance optimizations
+# Step 7: Performance optimizations
 
-## Stage 8: Power optimizations (for laptops)
+# Step 8: Power optimizations (for laptops)
 
-## Stage 9: Essentials of system management & Troubleshooting
+# Step 9: Essentials of system management & Troubleshooting
