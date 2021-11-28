@@ -152,6 +152,127 @@ $ cat /mnt/etc/fstab
 
 ## Step 3: Essential system configuration
 
+Change root to load into the new system:
+```
+$ arch-chroot /mnt
+```
+
+Set time zone:
+```
+$ hwclock --systohc (--utc)                     # use hardware clock
+$ timedatectl list-timezones
+$ timedatectl set-timezone "Region"/"City"      # this links /usr/share/zoneinfo/"Region"/"City" to /etc/localtime ?
+$ timedatectl set-ntp true
+$ timedatectl status
+# systemctl enable systemd-timesyncd		
+      # synchs clock on boot, should be enabled by set-ntp true
+```
+
+Mirror refresh automation:
+```
+$ pacman -Syu reflector
+$ nano /etc/xdg/reflector/reflector.conf
+      --save /etc/pacman.d/mirrorlist
+      --country "Country1","Country2..."
+      --protocol https
+      --sort rate
+      --latest 5
+$ systemctl enable reflector.timer              # refreshes once a week
+```
+
+Hostname configuration:
+```
+$ hostnamectl set-hostname "Hostname"           # eg. ArchLinux
+$ nano /etc/hosts
+      127.0.0.1   localhost
+      ::1         localhost
+      127.0.1.1   "Hostname"
+```
+
+Set system locale:
+```
+$ nano /etc/locale.gen
+      # uncomment selected locale
+      # eg. en_US.UTF-8 for default American English
+      # eg. en_IE.UTF-8 for English with EU formats and metric units
+$ locale-gen
+$ echo LANG="Selected Locale" > /etc/locale.conf
+$ export LANG="Selected Locale"                 # sets locale for all processes for current shell
+```
+
+Network configuration:
+```
+$ pacman -S networkmanager
+$ systemctl enable NetworkManager.service
+# after booting into the system, use $ nmtui or $ nmcli to set up wifi
+```
+
+Enable multilib - 32 bit app support: \
+_(optional, recommended)_
+```
+$ nano /etc/pacman.conf
+      # Uncomment 2 lines: [multilib] and Include =...
+$ pacman -Syu
+```
+
+For LVM, system encryption or RAID: \
+_(skip this, only here as reference)_
+```
+$ nano /etc/mkinitspcio.conf                    # modify initramfs config
+$ mkinitcpio -P                                 # recreate image using config
+$ mkinitcpio -p linux                           # regenerate using linux defaults
+# image must be specified in boot loader config file
+```
+
+Set root password:
+```
+$ passwd
+```
+
+Create a user with administrative privileges, create user password:
+```
+$ useradd -m -g users -G wheel "user"
+$ passwd "user"
+```
+
+Associate wheel group with sudo:
+```
+$ EDITOR=nano visudo                            # safely edit /etc/sudoers file
+      # Uncomment %wheel ALL=(ALL) ALL
+      # Optionally, if you want to require roots instead of users password, add:
+            Defaults rootpw
+```
+
+Install and configure boot loader: \
+_(systemd-boot used here, alternatively grub can be used)_
+```
+$ bootctl install
+$ pacman -S "Cpu"-ucode                         # intel-ucode or amd-ucode, depending on your CPU
+$ nano /boot/loader/entries/"Entry".conf        # recommended name arch.conf to avoid confusion
+      title "Title"                             # eg. title ArchLinux
+      linux /vmlinuz-linux
+      initrd /"Cpu"-ucode.img                   # intel-ucode.img / amd-ucode.img
+      initrd /initramfs-linux.img
+$ echo "options root=PARTUUID=$(blkid -s PARTUUID -o value /dev/sda3) rw" >> /boot/loader/entries/"Entry".conf
+      # this copies the UUID of your root partition and adds it to the loader
+      # it's optional but recommended and more reliable than label
+```
+
+Create a pacman hook to automatically update the bootloader: \
+_(optional but recommended)_
+```
+$ nano /etc/pacman.d/hooks/100-systemd-boot.hook
+      [Trigger]
+      Type = Package
+      Operation = Upgrade
+      Target = systemd
+
+      [Action]
+      Description = Updating systemd-boot
+      When = PostTransaction
+      Exec = /usr/bin/bootctl update
+```
+
 ## Step 4: Installing GPU drivers
 
 ## Step 5: Booting into the system, additional configuration
