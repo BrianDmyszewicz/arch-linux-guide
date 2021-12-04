@@ -5,6 +5,7 @@
 This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands.
 
 #### Conventions used in this guide are as follows:
+
 - Commands marked with: $
 - Comments marked with: #
 - Names or values to input: "..." 
@@ -18,11 +19,11 @@ This is a comprehensive and exhaustive Arch Linux step-by-step installation and 
 
 #### Download the latest ISO from https://archlinux.org/download/
       
-### - On Windows: 
+#### - On Windows: 
 
-#### Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
+Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
 
-### - On Linux or Mac:
+#### - On Linux or Mac:
 
 #### Verify the image:  
 download the PGP signature, place it in the ISO directory and run this: *(optional)*
@@ -60,7 +61,7 @@ might not be required, remember to reenable it after install
 #### Save changes and exit  
 should reboot into arch
 
-## Step 1: Initial ISO setup
+## Initial ISO setup
 
 #### Verify (uefi) boot mode:
 ```
@@ -99,7 +100,7 @@ $ timedatectl set-ntp true
 $ timedatectl status
 ```
 
-## Step 2: Partition, format, mount, install
+## Partition, format, mount, install
 
 #### Partition disks:  
 separate home and swap partitions are optional, replace sdX with your drive name eg. sda or nvme0
@@ -160,7 +161,7 @@ $ genfstab -U /mnt >> /mnt/etc/fstab
 $ cat /mnt/etc/fstab
 ```
 
-## Step 3: Essential system configuration
+## Essential system configuration
 
 #### Change root to load into the new system:
 ```
@@ -282,7 +283,7 @@ $ nano /etc/pacman.d/hooks/100-systemd-boot.hook
       Exec = /usr/bin/bootctl update
 ```
 
-## Step 4: Installing GPU drivers
+## Installing GPU drivers
 
 #### Identify the GPU:
 ```
@@ -291,7 +292,7 @@ $ lspci -k | grep -A 2 -E "(VGA|3D)"
 
 ***
 
-### - Intel integrated graphics:
+#### - Intel integrated graphics:
 ```
 $ pacman -S xf86-video-intel                                # DDX driver and 2D acceleration
             mesa lib32-mesa                                 # DRI driver for 3D acc / OpenGL
@@ -299,7 +300,7 @@ $ pacman -S xf86-video-intel                                # DDX driver and 2D 
             vulkan-intel lib32-vulkan-intel                 # Vulkan drivers
 ```
 
-### - AMD modern graphics:  
+#### - AMD modern graphics:  
 for GCN3/Radeon Rx 300 and newer cards
 ```
 $ pacman -S xf86-video-amdgpu                               # DDX driver and 2D acceleration
@@ -308,7 +309,7 @@ $ pacman -S xf86-video-amdgpu                               # DDX driver and 2D 
             vulkan-radeon lib32-vulkan-radeon               # Vulkan drivers
 ```
 
-### - AMD legacy graphics:  
+#### - AMD legacy graphics:  
 for GCN2/Radeon Rx 200 and older cards  
 *(more details on https://wiki.archlinux.org/title/ATI)*
 ```
@@ -316,20 +317,20 @@ $ pacman -S xf86-video-ati                                  # DDX driver and 2D 
             mesa lib32-mesa                                 # DRI driver for 3D acc / OpenGL
 ```
 
-### - AMD Radeon HD 7000 and RX200 generations:  
+#### - AMD Radeon HD 7000 and RX200 generations:  
 *https://wiki.archlinux.org/title/AMDGPU#Experimental*  
 *(section needs expanding)*
 
-### - Nvidia:  
+#### - Nvidia:  
 
-#### Install only ONE of the following 3 packages, depending on your kernel:***
+Install only ONE of the following 3 packages, depending on your kernel:***
 ```
 $ pacman -S nvidia                                          # for standard linux kernel
             nvidia-lts                                      # for the linux-lts kernel
             nvidia-dkms                                     # other kernels eg. linux-zen
 ```
 
-#### Install all of the following packages:  
+Install all of the following packages:  
 *(providing OpenGL, Vulkan, OpenCL support and configuration tools)*
 ```
 $ pacman -S vulkan-icd-loader lib32-vulkan-icd-loader       # Vulkan
@@ -342,7 +343,7 @@ $ nvidia-xconfig                                            # optional auto-conf
 $ nvidia-settings                                           # settings GUI, use after installation
 ```
 
-#### Enable DRM (direct rendering manager):  
+Enable DRM (direct rendering manager):  
 by adding a drm kernel mode setting in your boot loader entry
 ```
 $ nano /boot/loader/entries/"Entry".conf
@@ -350,14 +351,14 @@ $ nano /boot/loader/entries/"Entry".conf
       # eg. options root="UUID=361cn91740c73-2x9mm871c2dsa" rw nvidia-drm.modeset=1
 ```
 
-#### Ensure early loading of the drivers:  
+Ensure early loading of the drivers:  
 *(optional, recommended?)*
 ```
 $ nano /etc/mkinitcpio.conf
       MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)
 ```
 
-#### Automatically update initramfs after updating kernel or driver:  
+Automatically update initramfs after updating kernel or driver:  
 *(required when using early loading or custom kernels)*
 ```
 $ nano /etc/pacman.d/hooks/nvidia.hook
@@ -377,7 +378,7 @@ $ nano /etc/pacman.d/hooks/nvidia.hook
       Exec=/bin/sh -c 'while read -r trg; do case $trg in linux) exit 0; esac; done; /usr/bin/mkinitcpio -P'
 ```
 
-### - PRIME:  
+#### - PRIME:  
 hybrid graphics on laptops - Intel/AMD+Nvidia/AMD  
 check arch wiki, if you have a laptop with a modern dedicated gpu  
 *(this section needs expanding)*
@@ -392,23 +393,23 @@ $ pacman -S vulkan-tools
 $ vulkaninfo                                    # should show info about your GPU
 ```
 
-## Step 4.5: Hardware video acceleration  
+## Hardware video acceleration  
 
-#### Intel integrated graphics:  
+#### - Intel integrated graphics:  
 pick one or none depending on your CPU
 ```
 $ pacman -S intel-media-driver                  # 5th gen and newer intel CPUs
           libva-intel-driver                    # 3rd and 4th gen intel CPUs
 ```
 
-#### AMD:  
+#### - AMD:  
 install both unless running an ancient GPU
 ```
 $ pacman -S libva-mesa-driver                   # R600 (Radeon HD 2000) and newer
           mesa-vdpau                            # R300 (Radeon 9000) and newer
 ```
 
-#### Nvidia:  
+#### - Nvidia:  
 hardware accelerated video decoding is provided by nvidia-utils  
 for encoding with NVENC, create this rule
 ```
@@ -429,12 +430,12 @@ $ pacman -S radeontop                           # for AMD GPUs
 $ radeontop                                     # play video and monitor gpu usage
 ```
 
-## Step 5: Booting into the system, additional configuration
+## Booting into the system, additional configuration
 
-## Step 6: Installing a Desktop Environment, Display Manager, enabling services
+## Installing a Desktop Environment, Display Manager, enabling services
 
-## Step 7: Performance optimizations
+## Performance optimizations
 
-## Step 8: Power optimizations (for laptops)
+## Power optimizations (for laptops)
 
-## Step 9: Essentials of system management & Troubleshooting
+## Essentials of system management & Troubleshooting
