@@ -48,20 +48,20 @@ $ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
 
 ## Change BIOS settings and boot into Arch live environment:
 
-#### Insert the USB
+Insert the USB
 
-#### Enter BIOS on startup  
+Enter BIOS on startup  
 by mashing F2, F7, F11 etc. depending on the motherboard
 
-#### Disable secure boot  
+Disable secure boot  
 clear/delete secure boot keys if necessary, it's reversible
 
-#### Disable fast boot  
-might not be required, remember to reenable it after install
+*(optional)* Disable fast boot  
+only do it if you encounter issues, reenable it after install
 
-#### Change the boot priority of the USB drive to be the highest
+Change the boot priority of the USB drive to be the highest
 
-#### Save changes and exit  
+Save changes and exit  
 should reboot into arch
 
 ## Initial ISO setup
