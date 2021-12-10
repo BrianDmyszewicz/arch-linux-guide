@@ -16,28 +16,31 @@ This is a comprehensive and exhaustive Arch Linux step-by-step installation and 
 - sdX used to refer to hard drive (eg. sda, nvme0)
 
 ## Create a bootable USB 
-
-#### Download the latest ISO from https://archlinux.org/download/
       
-#### - On Windows: 
+#### On Windows: 
+
+Download the latest ISO from https://archlinux.org/download/
 
 Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
 
-#### - On Linux or Mac:
+#### On Linux or Mac:
 
-#### Verify the image:  
-download the PGP signature, place it in the ISO directory and run this: *(optional)*
+Download the latest ISO from https://archlinux.org/download/
+
+*(optional)* Verify the image:  
+by downloading the PGP signature, placing it in the ISO directory and running:  
 ```
 $ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig
 ```
 
-#### List all devices to determine the usb drive directory:  
-easiest by looking at size, the usb drive might be called sdb, sdc etc.
+List all blocks/devices to determine the usb drive directory:  
+easiest by looking at size, the usb drive might be called sdb, sdc etc. 
+I will refer to the u it as sdY
 ```
 $ lsblk
 ```
 
-#### Copy the ISO to the USB drive directory sdY:  
+Copy the ISO to the USB drive directory sdY:  
 replace sdY by whatever your drive name is, as displayed by lsblk
 ```
 $ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
