@@ -2,40 +2,39 @@
 
 #### Tested and up to date on the 2021/11/01 ISO
 
-This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands.
+This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide.
 
 #### Conventions used in this guide are as follows:
 
-- Commands marked with: $
-- Comments marked with: #
-- Names or values to input: "..." 
-- Optional names/values: (...)
-- Used to separate commands/inputs: ;
+- Commands can be split into multiple lines, they're marked with: $
+- Comments inbetween or after commands are marked with: #
+- Used to separate commands/inputs on a single line: ;
+- Names or values for the user to input: "..." 
+- Optional names or values: (...)
 - Optional steps marked with cursive
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda, nvme0)
 
-## Create a bootable USB 
-      
-#### On Windows: 
+## Create a bootable USB:
 
-Download the latest ISO from https://archlinux.org/download/
+#### - On Windows:
+
+Download the latest ISO, you can get it from https://archlinux.org/download/
 
 Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
 
-#### On Linux or Mac:
+#### - On Linux and Mac:
 
-Download the latest ISO from https://archlinux.org/download/
+Download the latest ISO, you can get it from https://archlinux.org/download/
 
-*(optional)* Verify the image:  
-by downloading the PGP signature, placing it in the ISO directory and running:  
+Verify the image *(optional)*  
+download the PGP signature, place it in the ISO directory and run:  
 ```
 $ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig
 ```
 
-List all blocks/devices to determine the usb drive directory:  
-easiest by looking at size, the usb drive might be called sdb, sdc etc. 
-I will refer to the u it as sdY
+Determine the usb drive directory  
+by listing all block devices and looking at their size, the usb drive might be called sdb, sdc etc. I will refer to it as sdY
 ```
 $ lsblk
 ```
@@ -54,9 +53,9 @@ Enter BIOS on startup
 by mashing F2, F7, F11 etc. depending on the motherboard
 
 Disable secure boot  
-clear/delete secure boot keys if necessary, it's reversible
+clear/delete secure boot keys if necessary (it's reversible)
 
-*(optional)* Disable fast boot  
+Disable fast boot *(optional)* 
 only do it if you encounter issues, reenable it after install
 
 Change the boot priority of the USB drive to be the highest
