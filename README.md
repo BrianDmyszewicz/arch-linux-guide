@@ -2,7 +2,7 @@
 
 #### Tested and up to date on the 2021/11/01 ISO
 
-This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide.
+This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide, you can learn about those from my other guides. If you know how to create a bootable USB and boot into it, you can ignore the first two sections.
 
 #### Conventions used in this guide are as follows:
 
@@ -15,31 +15,32 @@ This is a comprehensive and exhaustive Arch Linux step-by-step installation and 
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda, nvme0)
 
-## Create a bootable USB:
+## Create a bootable USB on Windows:
 
-#### - On Windows:
+#### Download the latest ISO  
+You can get it from https://archlinux.org/download/
 
-Download the latest ISO, you can get it from https://archlinux.org/download/
+#### Burn the Arch ISO onto the USB drive  
+You can use a tool called Rufus (www.rufus.ie) or any other tool you want, make sure to format the USB drive to FAT32.
 
-Use Rufus, format to FAT32, burn the arch ISO (www.rufus.ie)
+## Create a bootable USB on Linux and Mac:  
 
-#### - On Linux and Mac:
+#### Download the latest ISO  
+you can get it from https://archlinux.org/download/
 
-Download the latest ISO, you can get it from https://archlinux.org/download/
-
-Verify the image *(optional)*  
+#### Verify the image *(optional)*  
 download the PGP signature, place it in the ISO directory and run:  
 ```
 $ gpg --keyserver-options auto-key-retrieve --verify archlinux-"ISO version"-x86_64.iso.sig
 ```
 
-Determine the usb drive directory  
+#### Determine the usb drive directory  
 by listing all block devices and looking at their size, the usb drive might be called sdb, sdc etc. I will refer to it as sdY
 ```
 $ lsblk
 ```
 
-Copy the ISO to the USB drive directory sdY:  
+#### Copy the ISO to the USB drive directory sdY:  
 replace sdY by whatever your drive name is, as displayed by lsblk
 ```
 $ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
@@ -47,25 +48,34 @@ $ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
 
 ## Change BIOS settings and boot into Arch live environment:
 
-Insert the USB
+#### Insert the USB  
 
-Enter BIOS on startup  
-by mashing F2, F7, F11 etc. depending on the motherboard
+#### Enter BIOS on startup:  
+Do this by mashing a specific key on startup, which key to press depends on the motherboard, most commonly F1, F2, F7 Esc or Del.
 
-Disable secure boot  
-clear/delete secure boot keys if necessary (it's reversible)
+#### Use UEFI boot mode:  
+There are 2 methods of booting a computer - the legacy mode using BIOS firmware or UEFI mode. UEFI is the default on all modern motherboards but in case you see this setting, make sure to select it, the bootloader used in this guide requires it.
 
-Disable fast boot *(optional)* 
+#### Disable secure boot:  
+Secure boot requires all firmware to be digitally signed to reduce chance of malware. Since your firmware will come from the kernel and official repositories, this is not required and can in fact cause many issues. To disable secure boot on some motherboards you might have to clear/delete secure boot keys. It's easily reversible so don't worry.
+
+#### Change the boot priority:
+Your BIOS will normally boot into your hard drive by default. You must change its boot priority to make sure that the USB is booted instead.  
+
+#### Save changes and exit:  
+the computer should reboot into arch linux
+
+#### In case of any issues:
+Disable fast boot *(optional)*  
 only do it if you encounter issues, reenable it after install
-
-Change the boot priority of the USB drive to be the highest
-
-Save changes and exit  
-should reboot into arch
 
 ## Initial ISO setup
 
+The Arch Linux ISO is a functional Arch system in form of a Live Environment, installed on the USB drive. It comes with the tools required to install Arch on your machine but also tools that allow you to access any Linux machine and troubleshoot it in case anything ever goes wrong, this will be covered in the recovery section. The following steps will make sure the Live Environment is running properly and has access to the internet.
+
 #### Verify (uefi) boot mode:
+
+, a modern solution. UEFI is always preferable and the bootloader i suggest requires it.
 ```
 $ ls /sys/firmware/efi/efivars
 ```
@@ -97,6 +107,8 @@ $ rfkill unblock all
 ```
 
 #### Update system clock:
+
+This enables systemd-timesyncd, a systemd component which synchronizes time.
 ```
 $ timedatectl set-ntp true
 $ timedatectl status
