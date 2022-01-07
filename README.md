@@ -2,7 +2,7 @@
 
 #### Tested and up to date on the 2021/11/01 ISO
 
-This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide, you can learn about those from my other guides. If you know how to create a bootable USB and boot into it, you can ignore the first two sections.
+This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide, you can learn about those from my other guides. If you already know how to create a bootable USB and boot into it, you can ignore the first two sections.
 
 #### Conventions used in this guide are as follows:
 
@@ -15,15 +15,9 @@ This is a comprehensive and exhaustive Arch Linux step-by-step installation and 
 - sdY used to refer to a usb drive (eg. sdc)
 - sdX used to refer to hard drive (eg. sda, nvme0)
 
-## Create a bootable USB on Windows:
-
-#### Download the latest ISO  
-You can get it from https://archlinux.org/download/
-
-#### Burn the Arch ISO onto the USB drive  
-You can use a tool called Rufus (www.rufus.ie) or any other tool you want, make sure to format the USB drive to FAT32.
-
 ## Create a bootable USB on Linux and Mac:  
+
+A bootable USB is a USB drive which carries an operating system and can be booted (meaning loaded/started) by a computer, much like a regular hard drive. In order to create a bootable USB, we must obtain the operating system and "install it" on said USB drive. This can be done using any software or through command line, as presented below. 
 
 #### Download the latest ISO  
 you can get it from https://archlinux.org/download/
@@ -46,7 +40,15 @@ replace sdY by whatever your drive name is, as displayed by lsblk
 $ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
 ```
 
-## Change BIOS settings and boot into Arch live environment:
+## Create a bootable USB on Windows:
+
+#### Download the latest ISO  
+You can get it from https://archlinux.org/download/
+
+#### Burn the Arch ISO onto the USB drive  
+You can use a tool called Rufus (www.rufus.ie) or any other tool you want, make sure to format the USB drive to FAT32.
+
+## Change BIOS settings and boot into Arch live environment:  
 
 #### Insert the USB  
 
@@ -60,78 +62,84 @@ There are 2 methods of booting a computer - the legacy mode using BIOS firmware 
 Secure boot requires all firmware to be digitally signed to reduce chance of malware. Since your firmware will come from the kernel and official repositories, this is not required and can in fact cause many issues. To disable secure boot on some motherboards you might have to clear/delete secure boot keys. It's easily reversible so don't worry.
 
 #### Change the boot priority:
-Your BIOS will normally boot into your hard drive by default. You must change its boot priority to make sure that the USB is booted instead.  
+Your BIOS will normally boot into your hard drive by default. You must change its boot priority to make sure that the USB is booted instead. Set the boot priority of your Arch USB drive to be the highest.  
 
 #### Save changes and exit:  
-the computer should reboot into arch linux
+The computer should reboot into Arch Linux, if it doesn't, make sure you performed the above steps correctly.  
 
-#### In case of any issues:
-Disable fast boot *(optional)*  
-only do it if you encounter issues, reenable it after install
+#### In case of any issues: *(optional)*  
+Disable fast boot - make sure to reenable it after the installation  
+
 
 ## Initial ISO setup
 
-The Arch Linux ISO is a functional Arch system in form of a Live Environment, installed on the USB drive. It comes with the tools required to install Arch on your machine but also tools that allow you to access any Linux machine and troubleshoot it in case anything ever goes wrong, this will be covered in the recovery section. The following steps will make sure the Live Environment is running properly and has access to the internet.
+The Arch Linux ISO is a functional Arch system in form of a Live Environment, installed on the USB drive. It comes with the tools required to install Arch on your machine but also tools that allow you to access any Linux machine and troubleshoot it in case anything ever goes wrong, this will be covered in the recovery section. The following steps will make sure the Live Environment is running properly and has access to the internet.  
 
-#### Verify (uefi) boot mode:
-
-, a modern solution. UEFI is always preferable and the bootloader i suggest requires it.
+#### Verify UEFI boot mode:
+This command should return a lot of EFI variables if you're using the UEFI boot mode. If it doesn't, return to BIOS settings.  
 ```
 $ ls /sys/firmware/efi/efivars
 ```
 
 #### Check network interface:
+Your wired connection will be called something like eth0, enp3s0, enp3s10 etc. If you don't have a wired connection, connect to wifi.
 ```
 $ ip link
 ```
 
-#### Connect to wifi: 
+#### Connect to wifi: *(optional)*  
+Iwctl is a tool built into the Arch ISO that allows you to connect to a wireless network. This tool isn't included by default on a clean Arch Linux installation so you'll only really have to use it now.
 ```
 $ iwctl
-$ device list                                   # find wireless interface/device
+$ device list                                   # find wireless interface/device eg. wlan0
 $ station "Device" scan                         # eg. station wlan0 scan
-$ station "Device" get-networks
+$ station "Device" get-networks                 # should display all network names
 $ station "Device" connect "Network"
 $ "network's wifi password"
 # wait a couple seconds and quit iwctl using ctrl+d
 ```
 
-#### Verify connection:
-```		
-$ ping -c 5 archlinux.org
-```
-
-#### In case of wifi connection issues:
+If you encounter any issues, you can use rfkill to enable all wireless interfaces.  
 ```
 $ rfkill unblock all
 ```
 
-#### Update system clock:
+#### Verify connection:
+If a connection is established, you'll see 5 packets transmitted and received with time higher than 0.  
+```		
+$ ping -c 5 archlinux.org
+```
 
-This enables systemd-timesyncd, a systemd component which synchronizes time.
+#### Update system clock:
+This enables systemd-timesyncd, a systemd component which synchronizes system time to a remote server, using a simple NTP protocol. The status command should show that the NTP service is active and system clock is synchronized.  
 ```
 $ timedatectl set-ntp true
 $ timedatectl status
 ```
 
 ## Partition, format, mount, install
+Right now you're still using the Arch Live Environment on the USB drive. To install Arch on your hard drive, you must first partition it. The partitions must then be formatted depending on their function. Lastly, the formatted partitions created on the hard drive must be mounted on the currently used live usb drive, in order for the installation to be possible.
 
 #### Partition disks:  
-separate home and swap partitions are optional, replace sdX with your drive name eg. sda or nvme0
+Arch only requires a boot partition, used to initially boot into the system, and a root partition, where the entire system lives. It is highly recommended, however, to keep your user files (home directory) on a separate partition. A swap partition is also recommended, the system can use it as "emergency RAM" to prevent freezes and crashes. To create all 4 using recommended names and sizes, follow the steps below.  
+
+Replace sdX with your drive name eg. sda, nvme0, nvme0n1 etc, as identified by the output of lsblk.
 ```
-$ lsblk                                         # identify your hard drive (eg. sda) by its size
-$ hdparm -i /dev/sdX                            # optionally inspect the drive to make sure
-$ sgdisk -Z /dev/sdX                            # CAUTION! this zaps/wipes the drive
+$ lsblk                                         # identify your hard drive by looking at its size
+$ hdparm -i /dev/sdX                            # inspect the drive to make sure it's the right one
+$ sgdisk -Z /dev/sdX                            # caution! this will completely wipe the drive
 $ cgdisk /dev/sdX
       New; default; "..."MiB; ef00; boot        # 1024MiB is recommended
-      New; default; "..."GiB; 8200; swap        # for hibernation 2xRam
-      New; default; "..."GiB; default, root     # at least 20, safest 40
+      New; default; "..."GiB; 8200; swap        # twice your Ram if you want hibernation
+      New; default; "..."GiB; default, root     # at least 20 but i recommend 40
       New; default; default; default; home
       Write; Quit;
 ```
 
 #### Format partitions and setup Swap:  
-instead of sdX1-4, use appropriate partition names, like sda1-4, nvme0p1-p4 or nvme0n1p1-p4
+It's recommended and simplest to format the root partition to ext4. The same is recommended for the home partition. Boot partition is an exception, it's a special EFI system partition and must use the FAT32 format. The swap partition is not formatted, instead swap is "made" and enabled.
+
+Instead of sdX1-4, use appropriate partition names, like sda1-4, nvme0p1-p4 or nvme0n1p1-p4
 ```
 $ lsblk                                         # identify your partition names
 $ mkfs.fat -F32 /dev/sdX1                       # formats boot as fat32
@@ -141,38 +149,47 @@ $ mkfs.ext4 /dev/sdX3                           # formats root to ext4
 $ mkfs.ext4 /dev/sdX4                           # formats home to ext4
 ```
 
-#### Mounting folders for installation:  
-once again, use your own partition names
+#### Mounting partitions:  
+First mount the root directory at /mnt, a mount point directory of the live arch environment. Then make home and boot directories under the /mnt directory in order to then mount their corresponding partitions there. If you understand unix directory structure, this should make sense, as home and boot are subdirectories of root. Once the hard drive partitions are properly mounted on the live usb drive, the installation can be performed.  
+
+Once again, use your own partition names instead of sdX1-4
 ```
-$ mount /dev/sda3 /mnt                          # mount root
+$ mount /dev/sdX3 /mnt                          # mount root
 $ mkdir /mnt/boot                               # create boot directory
 $ mkdir /mnt/home                               # create home directory
-$ mount /dev/sda1 /mnt/boot                     # mount boot partition at the boot directory
-$ mount /dev/sda4 /mnt/home                     # mount home partition at the home directory
+$ mount /dev/sdX1 /mnt/boot                     # mount boot partition at the boot directory
+$ mount /dev/sdX4 /mnt/home                     # mount home partition at the home directory
 ```
 
 #### Configuring mirrors on the installation device:  
-*(optional but recommended for faster installation)*
+*(optional but recommended for faster installation)*  
+
+A mirror is a server that provides an exact copy of repositories that you'll use to download and install the system, software and any updates. Mirrors might at times experience downtime or be out of date and your local mirrors will provide a much faster download speed so it's worth configuring and updating them. Reflector is a tool built into the Arch ISO which can be used to refresh your mirrors, you can configure it as follows:
 ```
-$ nano /etc/xdg/reflector/reflector.conf        # configure reflector - a mirror refreshing tool
-      --save /etc/pacman.d/mirrorlist
-      --country "Country1","Country2..."
-      --protocol https
-      --sort rate
-      --latest 5
+$ nano /etc/xdg/reflector/reflector.conf        # use nano to edit the reflector configuration file
+      --save /etc/pacman.d/mirrorlist           # tells reflector where to save the mirror list
+      --country "Country1","Country2..."        # this is optional, sorting latest by rate is often sufficient
+      --protocol https                          # also optional but technically more secure
+      --sort rate                               # sorts mirrors by download speed
+      --latest 5                                # only saves 5 most up to date mirrors
 $ systemctl start reflector.service             # start a service that refreshes mirrors
 ```
 
 #### Installation of system and base utilities:  
-*(optionally you can install lts or custom kernel and headers or a different terminal text editor)*
+
+Pacstrap is a tool built into the arch ISO that allows for an easy Arch installation. It can also install some additional packages that you will need to set up the system. I recommend installing nano as a terminal text editor, git in order to install software from the Arch User Repository and reflector, in order to automate refreshing mirrors. (reflector was present on the Arch ISO but by default isn't installed on a clean Arch system)  
+
+*(optionally you can install linux-lts or custom kernel and headers here but this is not covered here)*  
 ```
-$ pacstrap -i /mnt base base-devel linux linux-headers linux-firmware nano git
+$ pacstrap -i /mnt base base-devel linux linux-headers linux-firmware nano git reflector
 ```
 
-#### Making an fstab file (file system table) which mounts partitions into filesystem on boot:
+#### Making a file system table:
+
+A file system table or an fstab file is stored in /etc/fstab. It contains rules that tell systemd where to mount partitions or remote file systems on boot. For instance, it will make sure that your home partition is always mounted in the home directory under root. Fstab can be generated using genfstab and its output can be sent to the desired location. Remember that despite already installing Arch on the hard drive, we're still using the Live Environment, therefore we must save fstab at /mnt/etc/fstab, as we use the temporary mount point /mnt as our root directory.
 ```
-$ genfstab -U /mnt >> /mnt/etc/fstab
-$ cat /mnt/etc/fstab
+$ genfstab -U /mnt >> /mnt/etc/fstab            # -U option defines partitions by their UUID
+$ cat /mnt/etc/fstab                            # displays the content of the fstab file
 ```
 
 ## Essential system configuration
