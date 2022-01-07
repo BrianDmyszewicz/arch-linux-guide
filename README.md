@@ -191,7 +191,7 @@ $ cat /mnt/etc/fstab                            # displays the content of the fs
 Now Arch Linux is technically already installed on your hard drive, but it's not ready to boot just yet. Additional configuration must first be performed, most importantly creating a user and installing a bootloader.
 
 #### Change root to load into the new system:
-Remember that you are still using the Live Environment, to perform the following steps you must 
+You are still using the Live Environment, to continue configuration, you must start using the new system installed on your hard drive. Since the system is not able to boot yet, this can be done using the arch-chroot (change root) tool, included in the Arch ISO. Chroot changes the working root directory to that of a new system, mounted on the hard drive and allows us to access the new system.  
 ```
 $ arch-chroot /mnt
 ```
