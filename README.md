@@ -161,9 +161,7 @@ $ mount /dev/sdX1 /mnt/boot                     # mount boot partition at the bo
 $ mount /dev/sdX4 /mnt/home                     # mount home partition at the home directory
 ```
 
-#### Configuring mirrors on the installation device:  
-*(optional but recommended for faster installation)*  
-
+#### Configuring mirrors on the installation device:
 A mirror is a server that provides an exact copy of repositories that you'll use to download and install the system, software and any updates. Mirrors might at times experience downtime or be out of date and your local mirrors will provide a much faster download speed so it's worth configuring and updating them. Reflector is a tool built into the Arch ISO which can be used to refresh your mirrors, you can configure it as follows:
 ```
 $ nano /etc/xdg/reflector/reflector.conf        # use nano to edit the reflector configuration file
@@ -176,25 +174,24 @@ $ systemctl start reflector.service             # start a service that refreshes
 ```
 
 #### Installation of system and base utilities:  
-
-Pacstrap is a tool built into the arch ISO that allows for an easy Arch installation. It can also install some additional packages that you will need to set up the system. I recommend installing nano as a terminal text editor, git in order to install software from the Arch User Repository and reflector, in order to automate refreshing mirrors. (reflector was present on the Arch ISO but by default isn't installed on a clean Arch system)  
-
-*(optionally you can install linux-lts or custom kernel and headers here but this is not covered here)*  
+Pacstrap is a tool built into the arch ISO that allows for an easy Arch installation. It can also install some additional packages that you will need to set up the system. I recommend installing nano as a terminal text editor, git in order to install software from the Arch User Repository and reflector, in order to automate refreshing mirrors. (reflector and nano were present on the Arch ISO but aren't installed by default on a clean Arch system)  
 ```
 $ pacstrap -i /mnt base base-devel linux linux-headers linux-firmware nano git reflector
 ```
 
 #### Making a file system table:
-
 A file system table or an fstab file is stored in /etc/fstab. It contains rules that tell systemd where to mount partitions or remote file systems on boot. For instance, it will make sure that your home partition is always mounted in the home directory under root. Fstab can be generated using genfstab and its output can be sent to the desired location. Remember that despite already installing Arch on the hard drive, we're still using the Live Environment, therefore we must save fstab at /mnt/etc/fstab, as we use the temporary mount point /mnt as our root directory.
 ```
 $ genfstab -U /mnt >> /mnt/etc/fstab            # -U option defines partitions by their UUID
 $ cat /mnt/etc/fstab                            # displays the content of the fstab file
 ```
 
-## Essential system configuration
+## Essential system configuration  
+
+Now Arch Linux is technically already installed on your hard drive, but it's not ready to boot just yet. Additional configuration must first be performed, most importantly creating a user and installing a bootloader.
 
 #### Change root to load into the new system:
+Remember that you are still using the Live Environment, to perform the following steps you must 
 ```
 $ arch-chroot /mnt
 ```
