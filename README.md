@@ -2,7 +2,7 @@
 
 #### Tested and up to date on the 2021/11/01 ISO
 
-This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide, you can learn about those from my other guides. If you already know how to create a bootable USB and boot into it, you can ignore the first two sections.
+This is a comprehensive and exhaustive Arch Linux step-by-step installation and configuration guide as well as a basic user guide. It is meant for everyone willing to give arch a try but not being able to grasp the multitude of options and concepts described on archwiki. It aims to provide sane defaults and cover system optimization and maintenance, all in a single, easy to follow file, including appropriate commands. It is highly recommended that you're familiar with general unix system structure and commands before following this guide, you can learn about those from my other guides.
 
 #### Conventions used in this guide are as follows:
 
