@@ -11,8 +11,8 @@ Comments inbetween or after commands are marked with: #
 Used to separate commands/inputs on a single line: ;  
 _**Names**_ or _**values**_ for you to input marked with _**bold italic**_  
 Optional names or values: (...)  
-sdY used to refer to a usb drive (eg. sdc)  
-sdX used to refer to hard drive (eg. sda, nvme0)  
+<b><i>sdY</b></i> used to refer to a usb drive (eg. sdc)  
+<b><i>sdX</b></i> used to refer to hard drive (eg. sda, nvme0)  
 
 ## Create a bootable USB on Linux:  
 
@@ -24,19 +24,19 @@ you can get it from https://archlinux.org/download/
 #### Verify the image *(optional)*  
 download the PGP signature, place it in the ISO directory and run:  
 <pre>
-$ gpg --keyserver-options auto-key-retrieve --verify archlinux-<b><i>ISO version</i></b>-x86_64.iso.sig
+$ gpg --keyserver-options auto-key-retrieve --verify archlinux-<b><i>ISO-Version</i></b>-x86_64.iso.sig
 </pre>
 
 #### Determine the usb drive directory  
-by listing all block devices and looking at their size, the usb drive might be called sdb, sdc etc. I will refer to it as sdY
+by listing all block devices and looking at their size, the usb drive might be called sdb, sdc etc. I will refer to it as <b><i>sdY</b></i>
 <pre>
 $ lsblk
 </pre>
 
-#### Copy the ISO to the USB drive directory sdY:  
-replace sdY by whatever your drive name is, as displayed by lsblk
+#### Copy the ISO to the USB drive directory _sdY_:  
+replace <b><i>sdY</b></i> by whatever your drive name is, as displayed by lsblk
 <pre>
-$ sudo cp "path to iso"/archlinux-"ISO version"-x86_64.iso /dev/sdY
+$ sudo cp <b><i>Path-To-ISO</b></i>/archlinux-<b><i>ISO-Version</b></i>-x86_64.iso /dev/<b><i>sdY</b></i>
 </pre>
 
 ## Create a bootable USB on Windows:
@@ -91,10 +91,10 @@ Iwctl is a tool built into the Arch ISO that allows you to connect to a wireless
 <pre>
 $ iwctl
 $ device list                                   # find wireless interface/device eg. wlan0
-$ station "Device" scan                         # eg. station wlan0 scan
-$ station "Device" get-networks                 # should display all network names
-$ station "Device" connect "Network"
-$ "network's wifi password"
+$ station <b><i>Device</b></i> scan                           # eg. station wlan0 scan
+$ station <b><i>Device</b></i> get-networks                   # should display all network names
+$ station <b><i>Device</b></i> connect <b><i>Network</b></i>
+$ <b><i>network's wifi password</b></i>
 # wait a couple seconds and quit iwctl using ctrl+d
 </pre>
 
@@ -125,12 +125,12 @@ Arch only requires a boot partition, used to initially boot into the system, and
 Replace sdX with your drive name eg. sda, nvme0, nvme0n1 etc, as identified by the output of lsblk.
 <pre>
 $ lsblk                                         # identify your hard drive by looking at its size
-$ hdparm -i /dev/sdX                            # inspect the drive to make sure it's the right one
-$ sgdisk -Z /dev/sdX                            # caution! this will completely wipe the drive
+$ hdparm -i /dev/<b><i>sdX</b></i>                            # inspect the drive to make sure it's the right one
+$ sgdisk -Z /dev/<b><i>sdX</b></i>                            # caution! this will completely wipe the drive
 $ cgdisk /dev/sdX
-      New; default; "..."MiB; ef00; boot        # 1024MiB is recommended
-      New; default; "..."GiB; 8200; swap        # twice your Ram if you want hibernation
-      New; default; "..."GiB; default, root     # at least 20 but i recommend 40
+      New; default; <b><i>value</b></i>MiB; ef00; boot        # 1024MiB is recommended
+      New; default; <b><i>value</b></i>GiB; 8200; swap        # twice your Ram if you want hibernation
+      New; default; <b><i>value</b></i>GiB; default, root     # at least 20 but i recommend 40
       New; default; default; default; home
       Write; Quit;
 </pre>
@@ -141,23 +141,23 @@ It's recommended and simplest to format the root partition to ext4. The same is 
 Instead of sdX1-4, use appropriate partition names, like sda1-4, nvme0p1-p4 or nvme0n1p1-p4
 <pre>
 $ lsblk                                         # identify your partition names
-$ mkfs.fat -F32 /dev/sdX1                       # formats boot as fat32
-$ mkswap /dev/sdX2                              # makes swap on swap partition
-$ swapon /dev/sdX2                              # enables swap
-$ mkfs.ext4 /dev/sdX3                           # formats root to ext4
-$ mkfs.ext4 /dev/sdX4                           # formats home to ext4
+$ mkfs.fat -F32 /dev/<b><i>sdX1</b></i>                       # formats boot as fat32
+$ mkswap /dev/<b><i>sdX2</b></i>                              # makes swap on swap partition
+$ swapon /dev/<b><i>sdX2 </b></i>                             # enables swap
+$ mkfs.ext4 /dev/<b><i>sdX3</b></i>                           # formats root to ext4
+$ mkfs.ext4 /dev/<b><i>sdX4</b></i>                           # formats home to ext4
 </pre>
 
 #### Mounting partitions:  
 First mount the root directory at /mnt, a mount point directory of the live arch environment. Then make home and boot directories under the /mnt directory in order to then mount their corresponding partitions there. If you understand unix directory structure, this should make sense, as home and boot are subdirectories of root. Once the hard drive partitions are properly mounted on the live usb drive, the installation can be performed.  
 
-Once again, use your own partition names instead of sdX1-4
+Once again, use your own partition names instead of <b><i>sdX1-4</b></i>
 <pre>
-$ mount /dev/sdX3 /mnt                          # mount root
+$ mount /dev/<b><i>sdX3</b></i> /mnt                          # mount root
 $ mkdir /mnt/boot                               # create boot directory
 $ mkdir /mnt/home                               # create home directory
-$ mount /dev/sdX1 /mnt/boot                     # mount boot partition at the boot directory
-$ mount /dev/sdX4 /mnt/home                     # mount home partition at the home directory
+$ mount /dev/<b><i>sdX1</b></i> /mnt/boot                     # mount boot partition at the boot directory
+$ mount /dev/<b><i>sdX4</b></i> /mnt/home                     # mount home partition at the home directory
 </pre>
 
 #### Configuring mirrors on the installation device:
@@ -167,7 +167,7 @@ Reflector is a tool built into the Arch ISO which can be used to refresh your mi
 <pre>
 $ nano /etc/xdg/reflector/reflector.conf        # use nano to edit the reflector configuration file
       --save /etc/pacman.d/mirrorlist           # tells reflector where to save the mirror list
-      --country "Country1","Country2..."        # this is optional, sorting latest by rate is often sufficient
+      --country <b><i>Country1</b></i>, <b><i>Country2</b></i>              # this is optional, sorting latest by rate is often sufficient
       --protocol https                          # also optional but technically more secure
       --sort rate                               # sorts mirrors by download speed
       --latest 5                                # only saves 5 most up to date mirrors
@@ -205,7 +205,7 @@ $ arch-chroot /mnt
 All available timezones are stored at /usr/share/zoneinfo/"Region"/"City". The system time is decided by /etc/localtime where a selected timezone can be symlinked to using ln -sf. Systemd tool timedatectl makes it even simpler. Lastly, hardware clock should
 <pre>
 $ timedatectl list-timezones                    # list all available timezones
-$ timedatectl set-timezone "Region"/"City"      # set a selected timezone eg. Europe/Amsterdam
+$ timedatectl set-timezone <b><i>Region</b></i>/<b><i>City</b></i>          # set a selected timezone eg. Europe/Amsterdam
 $ hwclock --systohc                             # set the hardware clock from the system clock
 $ timedatectl                                   # display time date information
 </pre>
@@ -221,7 +221,7 @@ Since you're using a new Arch system now and not the live USB, you need to confi
 <pre>
 $ nano /etc/xdg/reflector/reflector.conf        # use nano to edit the reflector configuration file
       --save /etc/pacman.d/mirrorlist           # tells reflector where to save the mirror list
-      --country "Country1","Country2..."        # this is optional, sorting latest by rate is often sufficient
+      --country <b><i>Country1</b></i>, <b><i>Country2</b></i>              # this is optional, sorting latest by rate is often sufficient
       --protocol https                          # also optional but technically more secure
       --sort rate                               # sorts mirrors by download speed
       --latest 5                                # only saves 5 most up to date mirrors
@@ -235,17 +235,21 @@ $ systemctl enable reflector.timer              # enables weekly automatic mirro
 #### Hostname configuration:
 Hostname is a unique name used to identify a machine on a network, it's stored in /etc/hostname and can be set with systemd using hostnamectl.
 <pre>
-$ hostnamectl set-hostname "Hostname"           # eg. hostnamectl set-hostname brians-arch-laptop
+$ hostnamectl set-hostname <b><i>Hostname</b></i>             # eg. hostnamectl set-hostname brians-arch-laptop
+</pre>
+
+Optionally, a "pretty hostname" can be set as well. To do this, edit the /etc/machine-info file, but you might want to skip this to avoid confusion. 
+<pre>
+$ nano /etc/machine-info
+      PRETTY_HOSTNAME="<b><i>your pretty hostname</b></i>"    # eg. PRETTY_HOSTNAME="Brian's Arch Laptop"
+</pre>
+
+Systemd provides local hostname resolution but some software might still need a hosts table. The table is located at /etc/hosts and associates IP addresses with hostnames, edit it accordingly:
+<pre>
 $ nano /etc/hosts
       127.0.0.1   localhost
       ::1         localhost
-      127.0.1.1   "Hostname"
-</pre>
-
-Optionally, a "pretty hostname" can be set as well. To do this, edit the /etc/machine-info file:  
-<pre>
-$ nano /etc/machine-info
-      PRETTY_HOSTNAME=""your pretty hostname""    # eg. PRETTY_HOSTNAME="Brian's Arch Laptop"
+      127.0.1.1   <b><i>Hostname</b></i>
 </pre>
 
 #### Set system locale:
