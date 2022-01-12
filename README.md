@@ -202,7 +202,7 @@ $ arch-chroot /mnt
 </pre>
 
 #### Set time zone:
-All available timezones are stored at /usr/share/zoneinfo/"Region"/"City". The system time is decided by /etc/localtime where a selected timezone can be symlinked to using ln -sf. Systemd tool timedatectl makes it even simpler. Lastly, hardware clock should
+All available timezones are stored at /usr/share/zoneinfo/"Region"/"City". The system time is decided by /etc/localtime where a selected timezone can be symlinked to using ln -sf. Systemd tool timedatectl does that for you. Hardware clock should then be set using the system clock.
 <pre>
 $ timedatectl list-timezones                    # list all available timezones
 $ timedatectl set-timezone <b><i>Region</b></i>/<b><i>City</b></i>          # set a selected timezone eg. Europe/Amsterdam
@@ -233,18 +233,18 @@ $ systemctl enable reflector.timer              # enables weekly automatic mirro
 </pre>
 
 #### Hostname configuration:
-Hostname is a unique name used to identify a machine on a network, it's stored in /etc/hostname and can be set with systemd using hostnamectl.
+Hostname is a unique name used to identify a machine on a network, it's stored in /etc/hostname and can be set by editing the file directly or using systemd's hostnamectl command.
 <pre>
 $ hostnamectl set-hostname <b><i>Hostname</b></i>             # eg. hostnamectl set-hostname brians-arch-laptop
 </pre>
 
-Optionally, a "pretty hostname" can be set as well. To do this, edit the /etc/machine-info file, but you might want to skip this to avoid confusion. 
+Optionally, a "pretty hostname" with special characters and spaces can be set as well but you might want to skip this to avoid confusion. To create it, edit the /etc/machine-info file accordingly:
 <pre>
 $ nano /etc/machine-info
       PRETTY_HOSTNAME="<b><i>your pretty hostname</b></i>"    # eg. PRETTY_HOSTNAME="Brian's Arch Laptop"
 </pre>
 
-Systemd provides local hostname resolution but some software might still need a hosts table. The table is located at /etc/hosts and associates IP addresses with hostnames, edit it accordingly:
+Systemd provides local hostname resolution but some software might still need a hosts table. The table is located at /etc/hosts and associates IP addresses with hostnames, edit it accordingly. (I won't explain networking in detail here)
 <pre>
 $ nano /etc/hosts
       127.0.0.1   localhost
@@ -253,6 +253,7 @@ $ nano /etc/hosts
 </pre>
 
 #### Set system locale:
+Locale decides on how time, dates, units and values are formatted
 <pre>
 $ nano /etc/locale.gen
       # uncomment selected locale
