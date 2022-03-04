@@ -276,6 +276,8 @@ $ systemctl enable NetworkManager.service
 <pre>
 $ nano /etc/pacman.conf
       # Uncomment 2 lines: [multilib] and Include =...
+      # Uncomment the line "parallel downloads" and set it to the number of threads of your CPU
+      # You can check number of threads using lscpu
 $ pacman -Syu
 </pre>
 
@@ -321,7 +323,7 @@ $ echo "options root=UUID=$(blkid -s UUID -o value /dev/sdX3) rw" >> /boot/loade
       # this copies the UUID of your root partition and adds it to the loader
 </pre>
 
-#### Create a pacman hook to automatically update the bootloader:  
+#### Create a pacman hook to automatically update the bootloader:  PENDING EDIT - NANO CANT CREATE DIRECTORY, DO THIS LATER
 *(optional but recommended)*
 <pre>
 $ nano /etc/pacman.d/hooks/100-systemd-boot.hook
