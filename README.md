@@ -323,9 +323,10 @@ $ echo "options root=UUID=$(blkid -s UUID -o value /dev/sdX3) rw" >> /boot/loade
       # this copies the UUID of your root partition and adds it to the loader
 </pre>
 
-#### Create a pacman hook to automatically update the bootloader:  PENDING EDIT - NANO CANT CREATE DIRECTORY, DO THIS LATER
+#### Create a pacman hook to automatically update the bootloader:
 *(optional but recommended)*
 <pre>
+$ mkdir /etc/pacman.d/hooks
 $ nano /etc/pacman.d/hooks/100-systemd-boot.hook
       [Trigger]
       Type = Package
