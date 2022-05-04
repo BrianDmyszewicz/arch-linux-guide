@@ -93,7 +93,7 @@ $ iwctl
 $ device list                                   # find wireless interface/device eg. wlan0
 $ station <b><i>Device</b></i> scan                           # eg. station wlan0 scan
 $ station <b><i>Device</b></i> get-networks                   # should display all network names
-$ station <b><i>Device</b></i> connect <b><i>Network</b></i>
+$ station <b><i>Device</b></i> connect <b><i>'Network'</b></i>
 $ <b><i>network's wifi password</b></i>
 # wait a couple seconds and quit iwctl using ctrl+d
 </pre>
